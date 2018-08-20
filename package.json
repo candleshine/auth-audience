@@ -1,6 +1,6 @@
 {
   "name": "@sakuraapi/auth-audience",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "Middleware to support JWT audience role for SakuraApi servers",
   "main": "lib/index.js",
   "types": "lib/index.d.js",
@@ -21,8 +21,7 @@
     "lint": "npm run build:test && npm run build && npm run lint:code && npm run lint:tests",
     "lint:code": "echo 'CODE LINT' ; npm run tslint -- -t stylish -c tslint.json -p tsconfig.json",
     "lint:tests": "echo 'TEST LINT' ; npm run tslint -- -t stylish -c tslint.spec.json -p tsconfig.spec.json",
-    "nsp": "nsp",
-    "prepare": "npm run build && npm test && npm run nsp check",
+    "prepare": "npm run build && npm test",
     "test": "npm run build && npm run jasmine",
     "tsc": "tsc",
     "tslint": "tslint"
@@ -46,7 +45,7 @@
   },
   "homepage": "https://github.com/sakuraapi/auth-audience#readme",
   "devDependencies": {
-    "@sakuraapi/core": "^0.18.0",
+    "@sakuraapi/core": "^0.19.4",
     "@types/express": "^4.16.0",
     "@types/jasmine": "^2.8.8",
     "@types/jsonwebtoken": "^7.2.8",
@@ -54,10 +53,9 @@
     "@types/urlsafe-base64": "^1.0.28",
     "@types/uuid": "^3.4.3",
     "istanbul": "^0.4.5",
-    "jasmine": "^3.1.0",
+    "jasmine": "^3.2.0",
     "jasmine-spec-reporter": "^4.2.1",
-    "nsp": "^3.2.1",
-    "source-map-support": "^0.5.6",
+    "source-map-support": "^0.5.8",
     "supertest": "^3.1.0",
     "tslint": "^5.11.0",
     "typescript": "^2.9.2"
@@ -70,6 +68,6 @@
     "uuid": "^3.3.2"
   },
   "peerDependencies": {
-    "@sakuraapi/core": "^0.17.3"
+    "@sakuraapi/core": "0.19.x"
   }
 }
