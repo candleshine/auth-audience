@@ -6,11 +6,8 @@ import {
   IAuthenticatorConstructor,
   SakuraApi,
   SakuraApiPluginResult
-}               from '@sakuraapi/core';
-import {
-  Request,
-  Response
-}               from 'express';
+} from '@sakuraapi/core';
+import {Request, Response} from 'express';
 import {verify} from 'jsonwebtoken';
 
 export type jsonBuilder = (req: Request, res: Response) => Promise<any>;
@@ -18,11 +15,18 @@ export type jsonErrBuilder = (err: any, req: Request, res: Response) => Promise<
 export type authorizedHandler = (jwtPayload: any, req: Request, res: Response) => Promise<any>;
 export type verifyErrorHandler = (err: Error, jwtPayload: any, req: Request, res: Response) => Promise<any>;
 
+/** interface used by domainedAudiences **/
+export interface IAudiences {
+  [domain: string]: {
+    [server: string]: string
+  }
+}
+
 export interface IAuthAudienceOptions {
   /**
    * The expected audience to verify; Leave undefined to not check
    */
-  audience?: string;
+  audience?: string | string[];
 
   /**
    * The header from which to get the token
@@ -38,6 +42,16 @@ export interface IAuthAudienceOptions {
    * The issuer expected; Leave undefined to not check
    */
   issuer?: string;
+
+  /**
+   * The a dictionary of domains and their keys
+   */
+  domainedAudiences?: IAudiences;
+
+  /**
+   * the expiration time on the key
+   */
+  exp?: string;
 
   /**
    * See: https://github.com/auth0/node-jsonwebtoken#jwtverifytoken-secretorpublickey-options-callback
@@ -257,6 +271,7 @@ export function addAuthAudience(sapi: SakuraApi, options: IAuthAudienceOptions):
     }
 
     try {
+// if doing multi domain config, decode token, look at domain field and see if it has domain
       const payload = await verifyJwt(token, options.key, options.jwtVerifyOptions);
 
       return {

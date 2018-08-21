@@ -1,17 +1,10 @@
 // tslint:disable:no-duplicate-imports
 import {IAuthenticator} from '@sakuraapi/core';
-import * as express     from 'express';
-import {
-  NextFunction,
-  Request,
-  Response
-}                       from 'express';
-import {sign}           from 'jsonwebtoken';
-import * as request     from 'supertest';
-import {
-  addAuthAudience,
-  IAuthAudienceOptions
-}                       from './audience-handler';
+import * as express from 'express';
+import {NextFunction, Request, Response} from 'express';
+import {sign} from 'jsonwebtoken';
+import * as request from 'supertest';
+import {addAuthAudience, IAuthAudienceOptions} from './audience-handler';
 // tslint:enable:no-duplicate-imports
 
 describe('jwtAudienceHandler', () => {
@@ -24,6 +17,26 @@ describe('jwtAudienceHandler', () => {
     audience: 'testAudience',
     issuer: 'testIssuer',
     key: '1234'
+  };
+
+  const domainedOptions: IAuthAudienceOptions = {
+    domainedAudiences: {
+      default: {
+        'default.domain': 'abcd'
+      },
+      domain1: {
+        'domain1.server': '123'
+      }
+    },
+    issuer: 'testIssuer',
+    key: 'abcd',
+    exp: '48h'
+  };
+
+  const arrayOptions: IAuthAudienceOptions = {
+    audience: ['testAudience1', 'testAudience2'],
+    issuer: 'testIssuer',
+    key: 'wxyz'
   };
 
   function getMockHandler(authAudience: IAuthenticator) {
@@ -180,6 +193,39 @@ describe('jwtAudienceHandler', () => {
     const body = (result as any).body;
 
     expect(body.fallthrough).not.toBeDefined('Auth should not have gotten here');
+    done();
+  });
+
+  it('reads domained audience config', async (done) => {
+    let result = await request(setupTestApp(domainedOptions))
+      .get('/')
+      .set('Authorization', `abcd`)
+      .expect(401)
+      .catch(done.fail);
+
+    const body = (result as any).body;
+    const server = Object.keys(domainedOptions.domainedAudiences.default)[0];
+    const key = domainedOptions.domainedAudiences.default[server];
+
+    const payload = {
+      aud: server,
+      iss: domainedOptions.issuer,
+      tokenInjected: true
+    };
+    console.log('payload: ', payload);
+    console.log('server: ', server);
+    console.log('key: ', key);
+    console.log('domainedOptions.issuer: ', domainedOptions.issuer);
+
+    const token = sign(payload, key);
+
+    // result = await request(setupTestApp(domainedOptions))
+    //   .get('/')
+    //   .set('Authorization', `${token}`)
+    //   .expect(200)
+    //   .catch(done.fail);
+    //
+    // expect(body.fallthrough).not.toBeDefined('Auth should not have gotten here');
     done();
   });
 });
